@@ -33,30 +33,47 @@ public:
         return T{};
     }
 
+    [[nodiscard]]
+    bool GetBool(std::int32_t index = -1) const noexcept;
+
     template<Arithmetic T>
     void PushNumber(T number) const noexcept
     {
         lua_pushnumber(m_state, static_cast<lua_Number>(number));
     }
 
+    void PushNull() const noexcept;
+    void PushBool(bool value) const noexcept;
+    void PushString(std::string_view str) const noexcept;
+
     bool OpenScript(std::string_view filePath) const noexcept;
 
     template<typename ReturnType>
+    [[nodiscard]]
     ReturnType GetReturn() const noexcept // Must be specilised for each type of calls
     {
         return ReturnType{};
     }
 
     template<Arithmetic ReturnType>
+    [[nodiscard]]
     ReturnType GetReturn() const noexcept
     {
         return GetNumber<ReturnType>();
     }
 
     template<>
+    [[nodiscard]]
     std::string GetReturn() const noexcept
     {
         return GetString();
+    }
+
+    template<>
+    [[nodiscard]]
+    bool GetReturn() const noexcept
+    {
+        return GetBool();
     }
 
     template<typename T>
@@ -68,6 +85,36 @@ public:
         PushNumber(arg);
     }
 
+    template<>
+    void SetArgument(std::nullptr_t null) const noexcept
+    {
+        PushNull();
+    }
+
+    template<>
+    void SetArgument(bool arg) const noexcept
+    {
+        PushBool(arg);
+    }
+
+    template<>
+    void SetArgument(const char* arg) const noexcept
+    {
+        PushString(arg);
+    }
+
+    template<>
+    void SetArgument(const std::string& arg) const noexcept
+    {
+        PushString(arg);
+    }
+
+    template<>
+    void SetArgument(std::string_view arg) const noexcept
+    {
+        PushString(arg);
+    }
+
     template<typename Arg, typename... Args>
     void SetArgument(Arg argument, Args... arguments) const noexcept
     {
@@ -76,6 +123,7 @@ public:
     }
 
     template<typename ReturnType>
+    [[nodiscard]]
     ReturnType CallFunction(std::string_view functionName) const noexcept
     {
         LoadGlobal(functionName);
@@ -92,6 +140,7 @@ public:
     }
 
     template<typename ReturnType, typename Arg>
+    [[nodiscard]]
     ReturnType CallFunction(std::string_view functionName, Arg argument) const noexcept
     {
         LoadGlobal(functionName);
@@ -110,6 +159,7 @@ public:
     }
 
     template<typename ReturnType, typename... Args>
+    [[nodiscard]]
     ReturnType CallFunction(std::string_view functionName, Args... arguments) const noexcept
     {
         LoadGlobal(functionName);
@@ -127,15 +177,7 @@ public:
         return ReturnType{};       
     }
 
-    void CallFunctionV(std::string_view functionName) const noexcept
-    {
-        LoadGlobal(functionName);
-
-        if(lua_isfunction(m_state, -1))
-        {
-            CheckError(lua_pcall(m_state, 0, 0, 0));
-        }
-    }
+    void CallFunctionV(std::string_view functionName) const noexcept;
 
     template<typename Arg>
     void CallFunctionV(std::string_view functionName, Arg argument) const noexcept

@@ -46,3 +46,36 @@ bool LuaStateMan::CheckError(int errorCode) const noexcept
 
     return true;
 }
+
+bool LuaStateMan::GetBool(std::int32_t index) const noexcept
+{
+    if (lua_isboolean(m_state, index))
+        return static_cast<bool>(lua_toboolean(m_state, index));
+    
+    return bool{};
+}
+
+void LuaStateMan::PushNull() const noexcept
+{
+    lua_pushnil(m_state);
+}
+
+void LuaStateMan::PushBool(bool value) const noexcept
+{
+    lua_pushboolean(m_state, static_cast<std::int32_t>(value));
+}
+
+void LuaStateMan::PushString(std::string_view str) const noexcept
+{
+    lua_pushlstring(m_state, std::data(str), std::size(str));
+}
+
+void LuaStateMan::CallFunctionV(std::string_view functionName) const noexcept
+{
+    LoadGlobal(functionName);
+
+    if(lua_isfunction(m_state, -1))
+    {
+        CheckError(lua_pcall(m_state, 0, 0, 0));
+    }
+}
