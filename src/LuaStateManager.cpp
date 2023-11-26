@@ -13,11 +13,9 @@ lua_State* LuaStateMan::Get() const noexcept
     return m_state;
 }
 
-LuaStateMan& LuaStateMan::LoadGlobal(const std::string& varName) noexcept
+void LuaStateMan::LoadGlobal(std::string_view varName) const noexcept
 {
-    lua_getglobal(m_state, varName.c_str());
-
-    return *this;
+    lua_getglobal(m_state, std::data(varName));
 }
 
 std::string LuaStateMan::GetString(std::int32_t index) const noexcept
@@ -28,9 +26,9 @@ std::string LuaStateMan::GetString(std::int32_t index) const noexcept
     return std::string{};
 }
 
-bool LuaStateMan::OpenScript(const std::string& filePath) const noexcept
+bool LuaStateMan::OpenScript(std::string_view filePath) const noexcept
 {
-    return CheckError(luaL_dofile(m_state, filePath.c_str()));
+    return CheckError(luaL_dofile(m_state, std::data(filePath)));
 }
 
 bool LuaStateMan::CheckError(int errorCode) const noexcept
