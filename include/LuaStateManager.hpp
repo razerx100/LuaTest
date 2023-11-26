@@ -69,10 +69,10 @@ public:
     }
 
     template<typename Arg, typename... Args>
-    void SetArguments(Arg argument, Args... arguments) const noexcept
+    void SetArgument(Arg argument, Args... arguments) const noexcept
     {
         SetArgument(argument);
-        SetArguments(std::forward<Args>(arguments)...);
+        SetArgument(std::forward<Args>(arguments)...);
     }
 
     template<typename ReturnType>
@@ -116,7 +116,7 @@ public:
 
         if(lua_isfunction(m_state, -1))
         {
-            SetArguments(std::forward<Args>(arguments)...);
+            SetArgument(std::forward<Args>(arguments)...);
 
             if(CheckError(lua_pcall(m_state, sizeof...(arguments), 1, 0)))
             {
@@ -157,7 +157,7 @@ public:
 
         if(lua_isfunction(m_state, -1))
         {
-            SetArguments(std::forward<Args>(arguments)...);
+            SetArgument(std::forward<Args>(arguments)...);
 
             CheckError(lua_pcall(m_state, sizeof...(arguments), 0, 0));
         }
