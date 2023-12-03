@@ -1,8 +1,5 @@
 # LuaTest
-A module to integrate the Lua programmming language with C++.
-
-# Third party library Used
-1. [Lua](http://www.lua.org/).
+A test repo to test [Selene](https://github.com/razerx100/Selene).
 
 ## Requirements
 cmake 3.21+.\

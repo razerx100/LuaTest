@@ -1,7 +1,51 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <vector>
 #include <LuaStateManager.hpp>
+#include <chrono>
+
+class Timer 
+{
+   template<typename T>
+    decltype(auto) GetDuration() const noexcept
+    {
+        return std::chrono::duration_cast<T>(std::chrono::high_resolution_clock::now() - m_timePoint);
+    }
+
+public:
+	void SetTimer() noexcept
+    {
+        m_timePoint = std::chrono::high_resolution_clock::now();
+    }
+
+	[[nodiscard]]
+	std::int64_t GetTimeNano() const noexcept
+    {
+        return GetDuration<std::chrono::nanoseconds>().count();
+    }
+
+	[[nodiscard]]
+	std::int64_t GetTimeMicro() const noexcept
+    {
+        return GetDuration<std::chrono::microseconds>().count();
+    }
+
+	[[nodiscard]]
+	std::int64_t GetTimeMili() const noexcept
+    {
+        return GetDuration<std::chrono::milliseconds>().count();
+    }
+
+	[[nodiscard]]
+	std::int64_t GetTimeSecond() const noexcept
+    {
+        return GetDuration<std::chrono::seconds>().count();
+    }
+
+private:
+	std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::nanoseconds> m_timePoint;
+};
 
 class Character
 {
@@ -65,7 +109,7 @@ private:
 int main()
 {
     LuaStateMan stateMan{};
-
+/*
     std::cout << "Before Update : \n";
 
     Character character1{stateMan, 20};
@@ -95,6 +139,29 @@ int main()
 
     std::cout << "Character 2 Type: " << character2.GetType()
     << " Health: " << character2.GetHealth() << "\n";
+
+    std::cout << "\n\n\n";
+    */
+
+    Timer timer{};
+
+    std::vector<Character> test;
+    const size_t charNum = 100'000;
+    test.reserve(charNum);
+
+    for(size_t index = 0u; index < charNum; ++index)
+    {
+        Character chara{stateMan, static_cast<std::int32_t>(index)};
+        chara.SetScript("../LuaSrc/Elf.lua");
+        test.emplace_back(std::move(chara));
+    }
+
+    timer.SetTimer();
+
+    for(Character& chara : test)
+        chara.LoadScript().Update().Health().Type();
+    
+    std::cout << "Time taken to load " << charNum << " scripts is " << timer.GetTimeMili() << "ms\n";
 
     return 0;
 }

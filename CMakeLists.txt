@@ -9,11 +9,20 @@ else()
     set(CXX_STANDARD_REQUIRED ON)
 endif()
 
-file(GLOB_RECURSE SRC src/*.cpp include/*.hpp)
+add_executable(${PROJECT_NAME} main.cpp)
 
-add_executable(${PROJECT_NAME} ${SRC} main.cpp)
+include(FetchContent)
 
-target_include_directories(${PROJECT_NAME} PUBLIC include/)
+message(STATUS "Fetching Selene...")
 
-add_subdirectory(Lua)
-target_link_libraries(${PROJECT_NAME} PUBLIC Lua)
+FetchContent_Declare(
+    Selene
+    GIT_REPOSITORY https://github.com/razerx100/Selene.git
+    GIT_TAG master
+)
+
+FetchContent_MakeAvailable(Selene)
+message("Fetched Selene.")
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Selene)
+target_include_directories(${PROJECT_NAME} PUBLIC Selene)
